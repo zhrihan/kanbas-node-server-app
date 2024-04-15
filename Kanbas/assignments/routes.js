@@ -1,48 +1,35 @@
-import Database from "./Database/index.js";
-
-export default function AssignmentRoutes(app){
-
-    // create assign
-    app.post("/api/courses/:courseId/assignments/",(req,res)=>{
-        const {courseId}=req.params();
-        // const assign= Database.assignments.find((a)=>a.course===courseId);
-        const assignment={...req.body, 
-            _id: new Date().getTime().toString()};
-        Database.assignments.push(assignment);
-        res.send(assignment);
-    })
-
-    // Retrieve assign
-
-    // single assign
-    app.get("/api/courses/:courseId/assignments/:assignId", (req,res)=>{
-        const {courseId, assignId}= req.params();
-        const assignment=Database.assignments.find((a)=>a._id===assignId);
-        res.send(assignment);
+import db from "../Database/index.js";
+export default function AssignmentRoutes(app) {
+    app.put("/api/assignments/:aid", (req, res) => {
+        const { aid } = req.params;
+        const assignmentIndex = db.assignments.findIndex(
+            (a) => a._id === aid);
+        db.assignments[assignmentIndex] = {
+            ...db.assignments[assignmentIndex],
+            ...req.body
+        };
+        res.sendStatus(204);
     });
 
-    // multiple for same course
-    app.get("/api/courses/:courseId/assignments", (req,res)=>{
-        const {courseId}= req.params();
-        const assignments=Database.assignments.find((a)=>a.course===courseId);
+    app.delete("/api/assignments/:aid", (req, res) => {
+        const { aid } = req.params;
+        db.assignments = db.assignments.filter((a) => a._id !== aid);
+        res.sendStatus(200);
+    });
+    app.post("/api/courses/:cid/assignments", (req, res) => {
+        const { cid } = req.params;
+        const newAssignment = {
+            ...req.body,
+            course: cid,
+            _id: new Date().getTime().toString(),
+        };
+        db.assignments.push(newAssignment);
+        res.send(newAssignment);
+    });
+    app.get("/api/courses/:cid/assignments", (req, res) => {
+        const { cid } = req.params;
+        const assignments = db.assignments
+            .filter((a) => a.course === cid);
         res.send(assignments);
     });
-
-    // Update assign
-
-    app.put("/api/courses/:courseId/assignments/:assignId", (req,res)=>{
-        const {courseId, assignId}=req.params();
-        const assignment=req.body;
-        Database.assignments=Database.assignments.map((a)=>
-        a._id===assignId? {...a,...assignment}:a);
-        res.sendStatus(204);
-    })
-
-    // Delete assign
-
-    app.delete("/api/courses/:courseId/assignments/:assignId", (req,res)=>{
-        const {courseId,assignId}=req.params;
-        Database.assignments=Database.assignments.filter((a)=>a._id!==assignId);
-        res.sendStatus(204);
-    })
 }
