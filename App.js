@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from 'express';
 import mongoose from "mongoose";
-import helloApp from './Hello.js';
+import helloApp from './hello.js';
 import Lab5 from "./Lab5.js";
 import cors from "cors";
 import CourseRoutes from "./Kanbas/courses/routes.js";
