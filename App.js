@@ -1,60 +1,65 @@
-// const express= require('express');
 import "dotenv/config";
-import express from "express";
-import morgan from "morgan";
-import Hello from "./Hello.js";
+import express from 'express';
+import mongoose from "mongoose";
+import helloApp from './Hello.js';
 import Lab5 from "./Lab5.js";
+import cors from "cors";
 import CourseRoutes from "./Kanbas/courses/routes.js";
 import ModuleRoutes from "./Kanbas/modules/routes.js";
-import AssignmentRoutes from "./Kanbas/assignments/routes.js";
-import UserRoutes from "./Kanbas/Users/routes.js";
-import cors from "cors";
+import AssignmentRoutes from './Kanbas/assignments/routes.js';
+import UserRoutes from "./Users/routes.js";
 import session from "express-session";
-import mongoose from "mongoose";
-
-const CONNECTION_STRING =  process.env.DB_CONNECTION_STRING ||'mongodb://127.0.0.1:27017/kanbas'
+const CONNECTION_STRING = process.env.DB_CONNECTION_STRING || 'mongodb://127.0.0.1:27017/kanbas';
 mongoose.connect(CONNECTION_STRING);
-
 const app = express();
-
-app.use(morgan("dev"));
-app.use(
-  cors({
-    credentials: true,
-    origin: process.env.FRONTEND_URL,
-  })
-);
-
+app.use(cors({
+  credentials: true,
+  origin: 'https://a6--hilarious-phoenix-11b533.netlify.app'
+}
+));
+app.use(express.json());
 const sessionOptions = {
-  secret: "keyboardcat",
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  proxy: true,
+  cookie: {
+        sameSite: 'none',
+        secure: true,
+        domain: "https://kanbas-node-server-app-1-tsx5.onrender.com"
+    }
 };
-
 if (process.env.NODE_ENV !== "development") {
   sessionOptions.proxy = true;
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
+    domain: process.env.HTTP_SERVER_DOMAIN,
   };
 }
+app.use(
+  session({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: false,
+    proxy: true,
+    cookie: {
+      sameSite: "none",
+      secure: true,
+        domain: "kanbas-node-server-app-1-tsx5.onrender.com",
+    },
+  })
+);
 
-app.use(express.json());
-app.use(session(sessionOptions));
-
-app.get("/", (_, res) => {
-  res.send({ status: "ok" });
-});
-
+AssignmentRoutes(app);
 ModuleRoutes(app);
 CourseRoutes(app);
-AssignmentRoutes(app);
 Lab5(app);
-Hello(app);
+helloApp(app);
 UserRoutes(app);
+app.get("/health_check", (req, res) => {
+  res.json({ message: "Welcome to the Kanbas API" });
+}
+);
 
-const PORT = process.env.PORT || 4000;
-
-app.listen(PORT, function () {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.listen(4000);
