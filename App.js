@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from 'express';
 import mongoose from "mongoose";
-import helloApp from './hello.js';
+import helloApp from './Hello.js';
 import Lab5 from "./Lab5.js";
 import cors from "cors";
 import CourseRoutes from "./Kanbas/courses/routes.js";
@@ -9,13 +9,13 @@ import ModuleRoutes from "./Kanbas/modules/routes.js";
 import AssignmentRoutes from './Kanbas/assignments/routes.js';
 import UserRoutes from "./Kanbas/Users/routes.js";
 import session from "express-session";
-const CONNECTION_STRING = 'mongodb://localhost:27017/kanbas';
+const CONNECTION_STRING =  process.env.DB_CONNECTION_STRING ||  'mongodb://localhost:27017/kanbas';
 mongoose.connect(CONNECTION_STRING);
 const app = express();
 app.use(cors({
   credentials: true,
-  // origin: 'https://a6--hilarious-phoenix-11b533.netlify.app'
-  origin: 'http://localhost:3000'
+  origin: 'https://a6--hilarious-phoenix-11b533.netlify.app'
+  // origin: 'http://localhost:3000'
 }
 ));
 app.use(express.json());
